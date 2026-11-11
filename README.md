@@ -1,3 +1,4 @@
+
 # Poke_token 1.0.0
 
 Windows 上的 ChatGPT / Codex 桌面用量浮窗。打开或切回 ChatGPT 后，浮窗显示当天 Token、美元和 credits 估算，以及每周剩余额度。统计使用本机 Codex 日志。
