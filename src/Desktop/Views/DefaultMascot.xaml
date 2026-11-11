@@ -1,0 +1,29 @@
+<Viewbox xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" VerticalAlignment="Center" IsHitTestVisible="False">
+        <!-- Clip the original reference to its character silhouette at display time. -->
+        <Canvas Width="492" Height="562" ClipToBounds="True">
+          <Image x:Name="DefaultMascot" Width="946" Height="2048" Stretch="Fill" Canvas.Left="-228" Canvas.Top="-627"
+                 RenderOptions.BitmapScalingMode="HighQuality">
+            <Image.Clip>
+              <StreamGeometry>
+                M 457,629
+                C 506,629 574,669 585,727 C 591,753 588,782 578,804
+                Q 582,809 584,814 C 608,832 621,853 628,882
+                C 646,895 667,918 686,932 C 710,949 721,975 715,1008
+                C 712,1033 698,1057 676,1057 C 658,1082 637,1097 613,1107
+                C 616,1123 614,1142 611,1156 L 615,1171 Q 619,1180 610,1178
+                L 585,1174 L 571,1185 Q 567,1189 550,1176 L 524,1182
+                Q 514,1184 518,1176 L 523,1166 Q 512,1146 507,1125
+                C 477,1128 445,1125 411,1114 C 399,1125 396,1140 395,1158
+                Q 395,1168 381,1171 Q 347,1177 316,1175 Q 302,1173 308,1165
+                Q 285,1168 291,1158 Q 298,1147 315,1140
+                C 297,1102 308,1071 344,1036 C 336,1016 333,991 334,967
+                C 306,975 267,978 248,972 Q 240,969 245,962
+                Q 225,959 231,952 Q 239,944 252,937 C 274,900 309,878 357,860
+                C 338,849 322,832 313,815 Q 306,801 319,780
+                C 314,757 315,729 327,702 C 346,661 401,628 457,629 Z
+              </StreamGeometry>
+            </Image.Clip>
+          </Image>
+        </Canvas>
+      </Viewbox>

@@ -1,0 +1,8 @@
+/CodexTokenPet.exe
+*.pdb
+*.user
+bin/
+obj/
+.vs/
+settings.json
+codex-token-pet-report.json
