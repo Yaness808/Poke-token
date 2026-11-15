@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Web.Script.Serialization;
+using TokenPet.Infrastructure.Pokemon;
 
 namespace TokenPet.Infrastructure.Configuration
 {
@@ -14,8 +15,13 @@ namespace TokenPet.Infrastructure.Configuration
         public double BottomInset { get; set; }
         public double Scale { get; set; }
         public string MascotPath { get; set; }
+        public int PokemonId { get; set; }
 
-        public Preferences() { ResetPlacement(); }
+        public Preferences()
+        {
+            ResetPlacement();
+            PokemonId = KantoCatalog.DefaultId;
+        }
 
         internal void ResetPlacement()
         {

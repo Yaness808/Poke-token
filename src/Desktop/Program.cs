@@ -19,7 +19,9 @@ namespace TokenPet.Desktop
             string folder = AppDomain.CurrentDomain.BaseDirectory;
             if (args.Contains("--preview"))
             {
-                CardView.Preview(Path.Combine(folder, "浮窗预览.png"));
+                int id;
+                if (args.Length < 2 || !int.TryParse(args[1], out id)) id = 4;
+                PetView.Preview(Path.Combine(folder, "浮窗预览.png"), id, args.Contains("details"));
                 return 0;
             }
 
