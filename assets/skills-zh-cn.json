@@ -1,0 +1,161 @@
+[
+  {
+    "name": "文档与演示",
+    "descriptions": {
+      "app-6945ac50c5e08191a653f9a2fdb5523e": "把想法和素材组织成演示幻灯片。",
+      "documents": "创建、编辑和审阅文档。",
+      "documents/documents": "创建、编辑和批注 Word 与 Google 文档，并通过渲染检查排版。",
+      "pdf": "读取、制作和校验 PDF。",
+      "pdf/pdf": "读取、生成、渲染和检查 PDF，适用于需要核对版式的表单和文件。",
+      "presentations": "创建和编辑演示文稿。",
+      "presentations/presentations": "制作、审阅和渲染 PowerPoint 或 Google 幻灯片。",
+      "google-drive": "在 Google 云端硬盘中管理文件，并访问文档、表格和幻灯片。",
+      "google-drive/google-docs": "创建和编辑原生 Google 文档。",
+      "google-drive/google-drive-comments": "查看、添加、回复或解决 Google 云端硬盘文件中的评论，并结合原文提供上下文。",
+      "google-drive/google-drive": "搜索和整理云端硬盘文件、管理共享、导出内容及查看版本历史。",
+      "google-drive/google-slides": "在 Google 幻灯片里制作演示，从参考稿提取统一风格，或改写现有幻灯片。",
+      "openai-templates": "提供文档、表格和演示文稿的预设模板。",
+      "openai-templates/artifact-template-business-review": "制作经营回顾演示，梳理业绩、变化、问题和后续事项。",
+      "openai-templates/artifact-template-investment-committee-memo": "按模板撰写投委会备忘录，概述投资逻辑、交易细节、财务分析、风险和建议。",
+      "openai-templates/artifact-template-legal-memorandum": "按模板撰写法律备忘录，整理法律问题、简要答案、事实、分析和结论。",
+      "openai-templates/artifact-template-market-trends-report": "制作市场趋势演示，呈现趋势、支持证据、影响和应对建议。",
+      "openai-templates/artifact-template-minimal-letterhead": "制作简洁的商务信函，安排发件人、收件人、主题、正文和签名。",
+      "openai-templates/artifact-template-operating-review": "制作运营回顾演示，汇总指标、各职能进展、风险、决策和待办事项。",
+      "openai-templates/artifact-template-simple-dark-mode": "使用深色模板制作演示，统一标题、分节页、图表和图像的版式。",
+      "openai-templates/artifact-template-simple-light-mode": "使用浅色模板制作演示，统一文字、结构、图表和图片排版。",
+      "openai-templates/artifact-template-strategy-memorandum": "撰写战略备忘录，说明背景、备选方案、利弊、风险、里程碑和建议。",
+      "template-creator": "将参考材料整理成可反复使用的个人模板。",
+      "template-creator/template-creator": "根据现有文档、表格、演示或网页制作与更新可复用模板。"
+    }
+  },
+  {
+    "name": "表格与数据分析",
+    "descriptions": {
+      "spreadsheets": "创建和编辑电子表格，处理公式、数据和图表。",
+      "spreadsheets/spreadsheets": "处理 Excel、CSV 或 TSV 等文件中的数据、公式、校验和图表。",
+      "spreadsheets/excel-live-control": "通过 ChatGPT 加载项操作 Excel 桌面端当前打开的工作簿。",
+      "google-drive/google-sheets": "创建和分析 Google 表格，精确读写单元格范围并创建图表。",
+      "visualize": "把数据和概念做成可交互的图表与可视化。",
+      "visualize/visualize": "在对话里制作交互图表、模拟和原型，用于比较选项和解释变化。",
+      "openai-templates/artifact-template-analytics-dashboard": "搭建数据看板，将指标和可视化汇总到电子表格。",
+      "openai-templates/artifact-template-experiment-analysis": "整理实验假设、方法、结果、解释、局限和下一步。",
+      "openai-templates/artifact-template-financial-budget": "制作财务预算表，比较实际值、预算和情景预测，跟踪差异及现金可支撑时间。",
+      "openai-templates/artifact-template-sales-pipeline": "跟踪销售机会、阶段、负责人、金额、成交概率、预测及下一步。",
+      "openai-templates/artifact-template-three-statement-forecast": "构建联动的利润表、资产负债表和现金流量表，记录假设、校验和摘要。"
+    }
+  },
+  {
+    "name": "邮件与日程",
+    "descriptions": {
+      "gmail": "搜索、阅读和管理 Gmail 邮件、会话及草稿。",
+      "google-calendar": "查找和管理 Google 日历活动，查看空闲时间并处理邀请。",
+      "google-contacts": "查找 Google 通讯录里保存的联系人及联系信息。"
+    }
+  },
+  {
+    "name": "浏览器与桌面自动化",
+    "descriptions": {
+      "app-6a9a3581fe6c8191b68b1b2d38f37dfd": "浏览网页并执行网站上的重复操作。",
+      "browser": "读取和操作 ChatGPT 内置浏览器中的网页。",
+      "chrome": "在 ChatGPT 中操作 Chrome 浏览器。",
+      "computer-use": "读取和操作 Windows 桌面应用。",
+      "computer-use/computer-use": "通过 ChatGPT 查看 Windows 应用界面，并执行点击、输入等操作。",
+      "unified-computer-use": "为应用中的浏览器自动化提供运行环境。"
+    }
+  },
+  {
+    "name": "开发与产品设计",
+    "descriptions": {
+      "github": "查看 GitHub 仓库和拉取请求，跟踪 Issue，排查 CI，并辅助发布工作。",
+      "product-design": "调研、审查和改进产品体验，并制作可查看的设计原型。",
+      "product-design/audit": "用截图核查产品页面和操作流程，报告可用性、视觉和无障碍问题。",
+      "product-design/design-qa": "对比已实现的原型与参考图或原页面，检查视觉差异。",
+      "product-design/get-context": "梳理产品目标、受众和约束，为设计工作形成简报。",
+      "product-design/ideate": "根据设计简报和参考素材探索多个视觉方向，生成候选方案。",
+      "product-design/image-to-code": "将参考图、截图或设计稿实现为贴合原稿的响应式前端。",
+      "product-design/index": "启动产品设计流程，用于设计探索、体验审查、参考稿复刻和原型分享。",
+      "product-design/research": "根据用户证据开展快速 UX 研究，定位最影响体验的问题。",
+      "product-design/share": "把可运行的原型通过选定的方式分享，供他人查看和试用。",
+      "product-design/url-to-code": "根据线上网页搭建可在本地运行的前端复刻。",
+      "product-design/user-context": "管理产品设计的项目背景、目标、参考链接和偏好。",
+      "engineering-suite-grill-me/domain-modeling": "梳理项目的领域模型和术语，编辑项目上下文或记录架构决策。",
+      "impeccable": "优化前端和应用界面，检查视觉层级、布局、字体、交互和无障碍。",
+      "review-agent": "审查代码改动并指出可复现、可修复的问题。",
+      "sites": "使用 Sites 创建、修改和发布网站。",
+      "sites/sites": "创建或更新可用的网站，包括落地页、作品集、门户、看板和小工具。",
+      "sites/sites-remix": "基于指定的 Sites 网站复制或改版，复用现有内容和结构。",
+      "openai-templates/artifact-template-design-report": "用设计报告模板整理研究发现、影响、建议和附录。",
+      "openai-templates/artifact-template-system-design": "撰写系统设计文档，记录需求、架构、数据流、接口、取舍和实施事项。"
+    }
+  },
+  {
+    "name": "图像与视频",
+    "displayNames": {
+      "personal-art-direction": "Personal Art Direction"
+    },
+    "descriptions": {
+      "imagegen": "按描述生成或编辑位图素材，可用于网页、游戏和透明背景插图。",
+      "personal-art-direction": "根据参考图为插画、角色设定和二维动效建立统一的美术方向。",
+      "fal": "使用 fal.ai 生成或编辑图像、视频等媒体素材。",
+      "fal/character-design": "创作角色设定、表情参考图和服装变体，并让同一角色在不同素材中保持一致。",
+      "fal/cinematography": "设计分镜、镜头语言、运镜、灯光、构图和调色，整理视频生成提示词。",
+      "fal/commercial": "规划并制作商业宣传图、产品摄影、广告和电商素材。",
+      "fal/fal-gamedev": "生成精灵图、像素角色、动作帧、背景和可供游戏使用的二维素材。",
+      "fal/fal-media": "通过 fal.ai 选择模型并生成、编辑或处理图像、视频和音频。",
+      "fal/fal-models-catalog": "浏览 fal.ai 模型目录，依照媒介和制作任务选择模型及接口。",
+      "fal/fal-prompting": "为所选 fal.ai 模型编写提示词，设计构图和镜头节奏并排查输出问题。",
+      "fal/fal-recipes": "参考现成的制作流程，完成广告、电影感画面、角色设计和图像或视频生成。",
+      "fal/fal-regenerate-3d": "制作 3D 角色选择体验，包括 GLB 模型、材质、配件和 Three.js 展示。",
+      "fal/fal-workflow": "搭建多阶段 fal.ai 工作流，衔接模型、关键帧、批量生成和后期处理。",
+      "fal/fan-cam": "以人物照片制作体育转播风格的粉丝镜头，包括看台反应和转播画面效果。",
+      "fal/marketing": "规划营销活动和素材矩阵，制作首发物料、落地页视觉和宣传视频。",
+      "fal/model-routing": "根据输入素材和目标效果，为创意制作挑选适合的 fal.ai 模型及接口。",
+      "fal/storytelling": "编排多镜头故事、分镜和旁白，维持角色与画面连续性。",
+      "fal/ugc": "制作创作者口播、广告开场、证言、开箱和产品演示视频。",
+      "hyperframes": "以 HTML 编写视频构图并渲染成视频。",
+      "hyperframes/gsap": "在视频构图中用 GSAP 编写动画、时间轴和缓动效果。",
+      "hyperframes/hyperframes-cli": "用 HyperFrames 命令行初始化、检查、预览、渲染或发布视频项目。",
+      "hyperframes/hyperframes-registry": "查找和安装 HyperFrames 视频组件，并将其接入现有构图。",
+      "hyperframes/hyperframes": "制作 HTML 视频、动画、字幕、旁白、音频联动效果和转场。",
+      "hyperframes/website-to-hyperframes": "将网站内容转成宣传视频、产品导览或其他 HyperFrames 视频。"
+    }
+  },
+  {
+    "name": "计划与工作流",
+    "descriptions": {
+      "engineering-suite-grill-me": "通过结构化追问检验想法、计划和关键决策。",
+      "engineering-suite-grill-me/entry-grill-me": "把 GrillMe 请求交给合适的访谈、分析或方案检验流程。",
+      "engineering-suite-grill-me/grill-me": "逐项追问计划或设计，找出未说明的假设，明确关键取舍。",
+      "engineering-suite-grill-me/grill-with-docs": "通过逐项追问完善计划，同时记录术语和架构决策。",
+      "engineering-suite-grill-me/grilling": "对计划、决策或设计发起连续追问，检验理由和边界条件。",
+      "engineering-suite-grill-me/idea-refine": "从原始想法出发，发散并比较方案，再明确可执行的方向。",
+      "engineering-suite-grill-me/interview-me": "一次问一个问题，逐步澄清目标、约束和真实需求。",
+      "engineering-suite-grill-me/loop-me": "通过反复追问明确当前工作区要搭建的工作流程。",
+      "openai-templates/artifact-template-operating-calendar": "按年或月规划运营里程碑、活动、发布、截止日期和重复事项。",
+      "openai-templates/artifact-template-project-kickoff": "整理项目启动材料，统一目标、范围、分工、里程碑、风险和协作方式。",
+      "openai-templates/artifact-template-project-tracker": "在表格中跟踪项目任务、负责人、状态、优先级、日期和甘特图。",
+      "openai-templates/artifact-template-team-alignment": "制作团队沟通与规划材料，明确背景、目标、重点、决策和待办。"
+    }
+  },
+  {
+    "name": "桌宠与个性化",
+    "descriptions": {
+      "work-pets": "在 ChatGPT 中创建和管理动画宠物。",
+      "work-pets/create-pet": "为 ChatGPT Work 创建、修复和预览动画宠物，并上传或启用成品。",
+      "work-pets/pets": "列出、查看、选择、下载或删除 ChatGPT Work 中的动画宠物。",
+      "work-pets/update-pet": "更新或修复 ChatGPT Work 自定义宠物的名称、介绍和动画帧图。",
+      "hatch-pet": "为 Codex 创建可按喜好选择画风的动画宠物。"
+    }
+  },
+  {
+    "name": "Codex 工具与管理",
+    "descriptions": {
+      "codex-app-tools": "通过本地 MCP 服务提供 Codex 桌面应用的操作工具。",
+      "openai-docs": "查找 Codex 和 ChatGPT Work 的官方使用说明，并指导首次接入 OpenAI API。",
+      "plugin-management": "发现适用的插件，查看权限和依赖，并管理插件连接。",
+      "plugin-management/plugin-management": "搜索和推荐插件、查看应用权限与依赖，以及管理插件连接或卸载。",
+      "skill-creator": "创建或完善 Codex 技能，组织说明、脚本与参考资源。",
+      "skill-installer": "从 openai/skills 或指定 GitHub 仓库安装技能。"
+    }
+  }
+]

@@ -18,12 +18,19 @@ namespace TokenPet.Infrastructure.Configuration
         public string MascotPath { get; set; }
         public int PokemonId { get; set; }
         public int[] FavoritePokemonIds { get; set; }
+        public double SkillsOverviewWidth { get; set; }
+        public double SkillsOverviewHeight { get; set; }
+        public int SkillsOverviewZoom { get; set; }
+        public bool SkillsOverviewMaximized { get; set; }
 
         public Preferences()
         {
             ResetPlacement();
             PokemonId = PokemonCatalog.DefaultId;
             FavoritePokemonIds = new int[0];
+            SkillsOverviewWidth = 660;
+            SkillsOverviewHeight = 560;
+            SkillsOverviewZoom = 100;
         }
 
         internal void ResetPlacement()

@@ -38,7 +38,7 @@ namespace TokenPet.Desktop
                 string preferencesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "JieniToken", "settings.json");
                 var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
-                var window = new OverlayWindow(usage, preferencesPath);
+                var window = new OverlayWindow(usage, preferencesPath, codexDirectory);
                 app.Dispatcher.BeginInvoke(new Action(window.Start));
                 return app.Run();
             }

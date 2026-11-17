@@ -23,6 +23,7 @@ namespace TokenPet.Desktop.Views
         private readonly SessionUsageSource usage;
         private readonly string preferencesPath;
         private readonly Preferences preferences;
+        private readonly ExtensionInventory extensions;
         private readonly PetView surface = new PetView();
         private readonly ScaleTransform scale = new ScaleTransform(1, 1);
         private readonly ContextMenu menu;
@@ -38,11 +39,14 @@ namespace TokenPet.Desktop.Views
         private WindowGesture gesture;
         private Summary latestSummary = new Summary();
 
-        internal OverlayWindow(SessionUsageSource usage, string preferencesPath)
+        internal OverlayWindow(SessionUsageSource usage, string preferencesPath, string codexDirectory)
         {
             this.usage = usage;
             this.preferencesPath = preferencesPath;
             preferences = Preferences.Load(preferencesPath);
+            extensions = new ExtensionInventory(codexDirectory,
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                Path.Combine(Path.GetDirectoryName(preferencesPath), "extension-history.json"));
             Title = "Codex Token Pet";
             AllowsTransparency = true;
             WindowStyle = WindowStyle.None;
@@ -66,6 +70,8 @@ namespace TokenPet.Desktop.Views
             using (var stream = typeof(OverlayWindow).Assembly.GetManifestResourceStream("TokenPet.MascotMenu.xaml"))
                 menu = (ContextMenu)XamlReader.Load(stream);
             menu.Resources.MergedDictionaries.Add(ComicDialog.LoadTheme());
+            AddMenu("Skills 总览", ShowSkillsOverview);
+            menu.Items.Add(new Separator());
             AddMenu("用量详情…", ShowUsageDetails);
             AddMenu("调整大小…", ChangeSize);
             AddMenu("恢复默认位置和大小", ResetPlacement);
@@ -100,6 +106,19 @@ namespace TokenPet.Desktop.Views
         {
             surface.ToggleDetails(latestSummary);
             Follow();
+        }
+
+        private void ShowSkillsOverview()
+        {
+            surface.HideDetails();
+            dialogOpen = true;
+            try
+            {
+                var overview = new SkillsOverviewWindow(this, extensions, preferences);
+                overview.ShowDialog();
+                if (overview.StoreLayout(preferences)) SavePreferences();
+            }
+            finally { dialogOpen = false; Follow(); }
         }
 
         private async void Refresh()

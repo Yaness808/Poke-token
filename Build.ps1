@@ -22,6 +22,8 @@ if ($Test) {
     "/resource:$source\Desktop\Views\UsageDetails.xaml,TokenPet.UsageDetails.xaml" `
     "/resource:$source\Desktop\Views\MascotMenu.xaml,TokenPet.MascotMenu.xaml" `
     "/resource:$source\Desktop\Views\ComicTheme.xaml,TokenPet.ComicTheme.xaml" `
+    "/resource:$source\Desktop\Views\SkillsOverview.xaml,TokenPet.SkillsOverview.xaml" `
+    "/resource:$PSScriptRoot\assets\skills-zh-cn.json,TokenPet.Skills.zh-CN.json" `
     "/resource:$source\Desktop\Pokemon\Picker.xaml,TokenPet.Picker.xaml" `
     "/resource:$PSScriptRoot\assets\kanto.json,TokenPet.Kanto.json" `
     "/resource:$PSScriptRoot\assets\johto.json,TokenPet.Johto.json" `

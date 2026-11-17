@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Markup;
@@ -32,10 +33,18 @@ namespace TokenPet.Desktop.Views
             };
         }
 
-        internal static void EnableTitleDrag(Window window, TextBlock title)
+        internal static void EnableTitleDrag(Window window, TextBlock title, Action doubleClick = null)
         {
             title.Background = Brushes.Transparent;
-            title.MouseLeftButtonDown += (s, e) => window.DragMove();
+            title.MouseLeftButtonDown += (s, e) =>
+            {
+                if (e.ClickCount == 2 && doubleClick != null)
+                {
+                    doubleClick();
+                    e.Handled = true;
+                }
+                else if (window.WindowState == WindowState.Normal) window.DragMove();
+            };
         }
     }
 }

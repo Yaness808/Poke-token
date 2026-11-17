@@ -6,6 +6,7 @@ using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -36,7 +37,8 @@ namespace TokenPet.Tests
                 TestUsage(directory, log);
                 TestPlacement(settings);
                 TestPokemon(directory, settings);
-                Console.WriteLine("PASS: usage, placement, Pokédex, favorites, transparent mascot, usage popup and comic windows.");
+                TestExtensions(directory);
+                Console.WriteLine("PASS: usage, placement, Pokédex, favorites, transparent mascot, comic windows and extension inventory.");
                 return 0;
             }
             catch (Exception ex)
@@ -49,6 +51,8 @@ namespace TokenPet.Tests
                 File.Delete(log);
                 File.Delete(settings);
                 File.Delete(settings + ".tmp");
+                File.Delete(Path.Combine(directory, "extension-history.json"));
+                File.Delete(Path.Combine(directory, "extension-history.json.tmp"));
                 Directory.Delete(sessions);
                 Directory.Delete(directory);
             }
@@ -145,14 +149,158 @@ namespace TokenPet.Tests
                 "The size dialog uses the shared comic frame and loads the configured scale.");
             size.Close();
 
-            var overlay = new OverlayWindow(null, settings);
+            var overlay = new OverlayWindow(null, settings, directory);
             var mascot = ((PetView)overlay.Content).Mascot;
             Require(mascot.Cursor != null && mascot.Cursor != Cursors.SizeAll, "Mascot uses the glove cursor.");
             var menu = mascot.ContextMenu;
-            Require(menu.Template != null && menu.Items.OfType<MenuItem>().Count() == 7 &&
+            Require(menu.Template != null && menu.Items.OfType<MenuItem>().Count() == 8 &&
+                (string)menu.Items.OfType<MenuItem>().First().Header == "Skills 总览" &&
                 menu.Items.OfType<MenuItem>().All(item => !item.Header.ToString().Contains("换回杰尼龟")),
                 "The comic menu has the expected actions.");
             overlay.Close();
+        }
+
+        private static void TestExtensions(string directory)
+        {
+            string history = Path.Combine(directory, "extension-history.json");
+            string skillPath = Path.Combine(directory, "GitHubSkill", "SKILL.md");
+            var reader = new ExtensionInventory(directory, directory, history);
+            var first = reader.ReadSnapshot(ExtensionReplies("github", true, new {
+                name = "GitHub Skill", description = "Reads a fixture.", path = skillPath, enabled = false, scope = "user"
+            }));
+            Require(first.Complete && first.Entries.Single(e => e.Kind == ExtensionEntry.Plugin).Status == ExtensionEntry.Enabled &&
+                first.Entries.Single(e => e.Kind == ExtensionEntry.Skill).Status == ExtensionEntry.Disabled,
+                "Inventory distinguishes enabled plugins from disabled user skills.");
+
+            var preferences = new Preferences();
+            var dialog = new SkillsOverviewWindow(null, reader, preferences);
+            dialog.ApplySnapshot(first);
+            var view = (FrameworkElement)((ContentControl)dialog.Content).Content;
+            var entries = (ListBox)view.FindName("Entries");
+            var query = (TextBox)view.FindName("Search");
+            var purpose = (ComboBox)view.FindName("Purpose");
+            Require(entries.Items.Groups.Count == 2, "Skills and plugins are grouped by their purpose.");
+            purpose.SelectedItem = purpose.Items.Cast<ComboBoxItem>().Single(item => (string)item.Content == "开发与产品设计");
+            query.Text = "github";
+            Require(dialog.AllowsTransparency && entries.Items.Count == 1 &&
+                ((ExtensionPresentation)entries.Items[0]).Description.Contains("拉取请求"),
+                "The comic overview filters by name and purpose while displaying translated descriptions.");
+            purpose.SelectedIndex = 0;
+            query.Text = "GitHub Skill";
+            Require(entries.Items.Count == 1 && ((ExtensionPresentation)entries.Items[0]).Description == "原文：Reads a fixture.",
+                "An untranslated skill can be found by name and displays the original description.");
+            query.Text = "Reads a fixture";
+            Require(entries.Items.Count == 0, "The original description cannot produce a name search hit.");
+
+            dialog.ApplySnapshot(new ExtensionSnapshot { Complete = true, Signature = "search-fixture", Entries = new[] {
+                new ExtensionEntry { Key = "art", Kind = ExtensionEntry.Skill, Name = "personal-art-direction" },
+                new ExtensionEntry { Key = "ui", Kind = ExtensionEntry.Skill, Name = "Impeccable", Version = "4.9.1" },
+                new ExtensionEntry { Key = "uppercase", Kind = ExtensionEntry.Skill, Name = "IM Tools" },
+                new ExtensionEntry { Key = "lowercase", Kind = ExtensionEntry.Skill, Name = "simple" },
+                new ExtensionEntry { Key = "split", Kind = ExtensionEntry.Skill, Name = "I-M Tools", Description = "I M, I.M, I/M" },
+                new ExtensionEntry { Key = "templates", Kind = ExtensionEntry.Plugin, Name = "Default templates",
+                    Description = "Templates for documents." },
+                new ExtensionEntry { Key = "drive", Kind = ExtensionEntry.Plugin, Name = "Google Drive",
+                    Source = "Docs", Description = "Manage documents." },
+                new ExtensionEntry { Key = "documents", Kind = ExtensionEntry.Plugin, Name = "Documents" },
+                new ExtensionEntry { Key = "docs", Kind = ExtensionEntry.Skill, Name = "Google Docs", PluginKey = "drive" },
+                new ExtensionEntry { Key = "notes", Kind = ExtensionEntry.Skill, Name = "Google Drive Notes", PluginKey = "drive" },
+                new ExtensionEntry { Key = "design", Kind = ExtensionEntry.Plugin, Name = "Product Design",
+                    PluginKey = "product-design@fixture" }
+            }});
+            query.Clear();
+            var drive = entries.Items.Cast<ExtensionPresentation>().Single(entry => entry.Key == "drive");
+            Require(drive.HasBundledSkills && drive.BundledSkills.Length == 2 &&
+                !entries.Items.Cast<ExtensionPresentation>().Any(entry => entry.IsBundledSkill),
+                "A plugin owns its bundled skills, which do not appear as separate rows while browsing.");
+            query.Text = "im";
+            Require(entries.Items.Cast<ExtensionPresentation>().Select(entry => entry.Key).OrderBy(key => key)
+                .SequenceEqual(new[] { "lowercase", "ui", "uppercase" }),
+                "Search matches contiguous letters regardless of case and never joins across separators.");
+            query.Text = "d";
+            Require(entries.Items.Cast<ExtensionPresentation>().Any(entry => entry.Key == "templates"),
+                "The list updates as soon as a single letter is entered.");
+            query.Text += "o";
+            Require(entries.Items.Cast<ExtensionPresentation>().Select(entry => entry.Key).OrderBy(key => key)
+                .SequenceEqual(new[] { "docs", "documents" }), "Adding a character immediately removes nonmatching names.");
+            query.Text = "DO";
+            Require(entries.Items.Cast<ExtensionPresentation>().Select(entry => entry.Key).OrderBy(key => key)
+                .SequenceEqual(new[] { "docs", "documents" }), "Only displayed names containing DO can match, regardless of case.");
+            query.Text = "Google Drive";
+            Require(entries.Items.Count == 1 && ((ExtensionPresentation)entries.Items[0]).Key == "drive",
+                "A bundled skill matching the same query as its plugin appears only under the plugin.");
+            var kind = (ComboBox)view.FindName("Category");
+            kind.SelectedIndex = 2;
+            query.Text = "Google Docs";
+            Require(entries.Items.Count == 0, "A bundled skill never appears under the standalone skill filter.");
+            query.Text = "Personal Art Direction";
+            Require(entries.Items.Count == 1 && ((ExtensionPresentation)entries.Items[0]).Name == "Personal Art Direction",
+                "Search uses the readable skill name.");
+            query.Text = "4.9.1";
+            Require(entries.Items.Count == 0, "A version label does not count as a name.");
+            query.Text = "Product Design";
+            var showAllMatches = (Button)view.FindName("ShowAllMatches");
+            Require(entries.Items.Count == 0 && showAllMatches.Visibility == Visibility.Visible,
+                "The overview signals when a type filter hides a search result.");
+            showAllMatches.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Require(entries.Items.Count == 1 && ((ExtensionPresentation)entries.Items[0]).Key == "design" &&
+                query.Text == "Product Design", "Showing all matches preserves the query and reveals the plugin.");
+
+            ((Button)view.FindName("ZoomIn")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Require(((ScaleTransform)entries.LayoutTransform).ScaleX == 1.1, "Zoom increases the list scale.");
+            var handle = (Thumb)view.FindName("ResizeHandle");
+            double previousWidth = dialog.Width;
+            handle.RaiseEvent(new DragDeltaEventArgs(-60, -50) { RoutedEvent = Thumb.DragDeltaEvent });
+            Require(dialog.Width < previousWidth && dialog.StoreLayout(preferences) && preferences.SkillsOverviewZoom == 110,
+                "Dragging resizes the overview and stores its size and zoom.");
+            dialog.Close();
+            var resized = new SkillsOverviewWindow(null, reader, preferences);
+            Require(resized.Width == preferences.SkillsOverviewWidth &&
+                ((ScaleTransform)((ListBox)((FrameworkElement)((ContentControl)resized.Content).Content)
+                    .FindName("Entries")).LayoutTransform).ScaleX == 1.1, "The overview restores its layout.");
+            resized.Close();
+
+            var unavailable = reader.ReadSnapshot(new Dictionary<int, Dictionary<string, object>>());
+            Require(!unavailable.Complete && unavailable.Entries.All(e => e.Status == ExtensionEntry.Unknown),
+                "A failed read cannot be mistaken for an uninstall.");
+            var second = reader.ReadSnapshot(ExtensionReplies("github", false, null));
+            Require(second.Entries.Single(e => e.Kind == ExtensionEntry.Plugin).Status == ExtensionEntry.Disabled &&
+                second.Entries.Single(e => e.Kind == ExtensionEntry.Skill).Status == ExtensionEntry.Removed,
+                "Refresh shows a disabled plugin and a deleted skill.");
+            var reopened = new ExtensionInventory(directory, directory, history)
+                .ReadSnapshot(ExtensionReplies(null, false, null));
+            Require(reopened.Entries.Length == 2 && reopened.Entries.All(e => e.Status == ExtensionEntry.Removed),
+                "Uninstalled entries and descriptions persist after restart.");
+
+            string bundledPath = Path.Combine(directory, "plugins", "cache", "fixture", "github", "local", "skills", "inbox", "SKILL.md");
+            File.WriteAllText(history, Json.Serialize(new[] {
+                new ExtensionEntry { Key = "skill:" + bundledPath, Kind = ExtensionEntry.Skill, Name = "Inbox",
+                    Source = "本机技能", FilePath = bundledPath, Status = ExtensionEntry.Enabled }
+            }));
+            var migrated = new ExtensionInventory(directory, directory, history)
+                .ReadSnapshot(ExtensionReplies("github", true, new {
+                    name = "Inbox", description = "Fixture skill.", path = bundledPath, enabled = true, scope = "user"
+                }));
+            var bundled = migrated.Entries.Single(entry => entry.Kind == ExtensionEntry.Skill);
+            Require(bundled.PluginKey == "github@fixture" && bundled.Source == "github",
+                "A skill reported from a plugin cache is associated with its plugin and replaces a legacy duplicate.");
+        }
+
+        private static Dictionary<int, Dictionary<string, object>> ExtensionReplies(string plugin, bool enabled, object skill)
+        {
+            var plugins = plugin == null ? new object[0] : new object[] { new {
+                id = plugin + "@fixture", name = plugin, installed = true, enabled,
+                @interface = new { shortDescription = "Plugin fixture." }
+            }};
+            var skills = skill == null ? new object[0] : new[] { skill };
+            return new Dictionary<int, Dictionary<string, object>> {
+                { 2, Json.Deserialize<Dictionary<string, object>>(Json.Serialize(new {
+                    marketplaces = new[] { new { name = "fixture", plugins } }, marketplaceLoadErrors = new object[0]
+                })) },
+                { 3, Json.Deserialize<Dictionary<string, object>>(Json.Serialize(new {
+                    data = new[] { new { skills, errors = new object[0] } }
+                })) }
+            };
         }
 
         private static void TestMascotLayout(PokemonSpecies species)

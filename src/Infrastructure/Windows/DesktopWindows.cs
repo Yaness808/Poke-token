@@ -14,6 +14,33 @@ namespace TokenPet.Infrastructure.Windows
         [StructLayout(LayoutKind.Sequential)]
         internal struct ScreenPoint { public int X, Y; }
 
+        internal enum ResizeHit
+        {
+            None = 0,
+            Left = 10,
+            Right = 11,
+            Top = 12,
+            TopLeft = 13,
+            TopRight = 14,
+            Bottom = 15,
+            BottomLeft = 16,
+            BottomRight = 17
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MonitorInfo
+        {
+            public int Size;
+            public Rect Monitor, Work;
+            public uint Flags;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MinMaxInfo
+        {
+            public ScreenPoint Reserved, MaxSize, MaxPosition, MinTrackSize, MaxTrackSize;
+        }
+
         [DllImport("user32.dll")] internal static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr window, out int process);
         [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr window);
@@ -25,6 +52,8 @@ namespace TokenPet.Infrastructure.Windows
         [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern IntPtr FindWindow(string className, string title);
         [DllImport("dwmapi.dll")] private static extern int DwmGetWindowAttribute(IntPtr window, int attribute, out Rect value, int size);
         [DllImport("user32.dll")] private static extern uint GetDpiForWindow(IntPtr window);
+        [DllImport("user32.dll")] private static extern IntPtr MonitorFromWindow(IntPtr window, uint flags);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
         [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")] private static extern IntPtr GetWindowLong(IntPtr window, int index);
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")] private static extern IntPtr SetWindowLong(IntPtr window, int index, IntPtr value);
         [DllImport("user32.dll")] private static extern bool SetWindowPos(IntPtr window, IntPtr after, int x, int y, int width, int height, uint flags);
@@ -114,6 +143,49 @@ namespace TokenPet.Infrastructure.Windows
         {
             uint dpi = GetDpiForWindow(window);
             return dpi == 0 ? 1 : dpi / 96.0;
+        }
+
+        internal static void SetMaximizedWorkArea(IntPtr window, IntPtr data)
+        {
+            const uint nearestMonitor = 2;
+            IntPtr monitor = MonitorFromWindow(window, nearestMonitor);
+            var area = new MonitorInfo { Size = Marshal.SizeOf(typeof(MonitorInfo)) };
+            if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref area)) return;
+
+            var limits = (MinMaxInfo)Marshal.PtrToStructure(data, typeof(MinMaxInfo));
+            limits.MaxPosition = new ScreenPoint { X = area.Work.Left - area.Monitor.Left, Y = area.Work.Top - area.Monitor.Top };
+            limits.MaxSize = new ScreenPoint { X = area.Work.Right - area.Work.Left, Y = area.Work.Bottom - area.Work.Top };
+            Marshal.StructureToPtr(limits, data, false);
+        }
+
+        internal static ResizeHit HitTestResizeBorder(IntPtr window, IntPtr coordinates)
+        {
+            Rect bounds;
+            if (!GetWindowRect(window, out bounds)) return ResizeHit.None;
+
+            long packed = coordinates.ToInt64();
+            // Screen coordinates can be negative on a secondary monitor.
+            int x = unchecked((short)packed) - bounds.Left;
+            int y = unchecked((short)(packed >> 16)) - bounds.Top;
+            int width = bounds.Right - bounds.Left;
+            int height = bounds.Bottom - bounds.Top;
+            if (x < 0 || x >= width || y < 0 || y >= height) return ResizeHit.None;
+
+            int edge = (int)Math.Ceiling(8 * DpiScale(window));
+            int corner = 2 * edge;
+            bool left = x < edge;
+            bool right = x >= width - edge;
+            bool top = y < edge;
+            bool bottom = y >= height - edge;
+
+            if ((top && x < corner) || (left && y < corner)) return ResizeHit.TopLeft;
+            if ((top && x >= width - corner) || (right && y < corner)) return ResizeHit.TopRight;
+            if ((bottom && x < corner) || (left && y >= height - corner)) return ResizeHit.BottomLeft;
+            if ((bottom && x >= width - corner) || (right && y >= height - corner)) return ResizeHit.BottomRight;
+            if (left) return ResizeHit.Left;
+            if (right) return ResizeHit.Right;
+            if (top) return ResizeHit.Top;
+            return bottom ? ResizeHit.Bottom : ResizeHit.None;
         }
 
         internal static bool IsPrimaryMouseDown()

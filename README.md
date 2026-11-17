@@ -1,11 +1,14 @@
 
-# Poke_token 1.1.7
+# Poke_token 1.2.0
 Windows 上的 ChatGPT / Codex 桌宠。轻点精灵可以摸头，并打开漫画气泡查看当天 Token、美元和 credits 估算，以及每周剩余额度。
 
 ## 安装和使用
 
 - 在 64 位 Windows 上解压到固定位置后，双击 `Install.cmd`。Windows 登录时会启动浮窗，ChatGPT 在前台时显示。
 - 按住精灵身体拖动，在 ChatGPT 窗口范围内移动。右键点精灵打开菜单。
+- 右键顶部的「Skills 总览」按用途展示插件和技能，可按用途或类型筛选。拖动窗口任一边或角即可调整大小，点击右上角或双击标题栏切换最大化与还原。底部的「− / +」缩放列表，点击百分比恢复 100%。窗口尺寸、最大化状态和列表缩放会自动保存。
+- 输入时实时匹配列表中显示的插件和技能名称，忽略大小写。例如 `do` 会找到 `Documents`。当前筛选隐藏名称匹配项时，点击「查看全部匹配」即可展开结果。
+- 点开带技能数量的插件行可查看它附带的技能。「独立技能」只列单独安装的技能。在「全部类型」中搜索附带技能的名称也可找到结果，条目会显示所属插件。
 - 轻点精灵会播放短暂的摸头效果并在原位打开用量气泡，再点可收起。右键「用量详情」也可开关气泡。
 - 右键选「调整大小」设置 65% 至 160% 的缩放。小窗口会限制实际显示尺寸。
 - 右键选「切换宝可梦」，可以按世代筛选第一至第七世代共 809 只宝可梦，或按中文名、英文名和图鉴编号搜索。选中后可先看立绘，再点击「选择这只」。
@@ -20,6 +23,7 @@ Windows 上的 ChatGPT / Codex 桌宠。轻点精灵可以摸头，并打开漫�
 - **美元与 credits** 是公开费率下的估算。模型费率在 `config/rates.json`。更新费率后重启生效。实际账单以账户为准。[API 费率](https://developers.openai.com/api/docs/pricing) · [ChatGPT credits](https://learn.chatgpt.com/docs/pricing)
 - **周剩余** 读取最近一条七天 Codex 通用额度记录，用 100% 减去已用比例。悬停可以查看记录时间和重置时间。日志缺少七天窗口或记录已经到期时显示「—」。切换账户或工作区后，以新写入的记录为准。[Codex 额度字段](https://learn.chatgpt.com/docs/app-server#6-rate-limits-chatgpt)
 - 日志目录优先使用 `CODEX_HOME`，默认使用 `%USERPROFILE%\.codex`。程序只读本机会话日志。
+- **Skills 总览**在窗口打开时自动向本机 Codex 刷新账户插件与用户技能状态。用途分类和中文介绍在 `assets/skills-zh-cn.json`，新增且尚无译文的条目显示原文。总览以账户和本机全局设置为准。已发现的条目保存在 `%LOCALAPPDATA%\JieniToken\extension-history.json`，卸载后仍可查看。
 - 图鉴收录全国图鉴 #001–#809 的默认形态。中文名、英文名和属性取自 PokéAPI 数据，立绘来自 PokéAPI 的 official-artwork 与宝可梦官网图鉴。仅在遇到缺少缓存的立绘时请求图片，用量数据留在本机。[PokéAPI 数据](https://github.com/PokeAPI/pokeapi/tree/8a92bfa7dab2f12b84b5d151562f9857c133ff30/data/v2/csv) · [PokéAPI 图像来源](https://github.com/PokeAPI/sprites) · [宝可梦官网图鉴](https://www.pokemon.com/pokedex/)
 
 ## 源码结构
@@ -28,7 +32,7 @@ Windows 上的 ChatGPT / Codex 桌宠。轻点精灵可以摸头，并打开漫�
 | --- | --- |
 | `src/Desktop/` | WPF 入口、桌宠布局与交互。用量气泡在 `Views/UsageDetails.xaml`，菜单与设置窗口共享 `Views/ComicTheme.xaml`，拖动计算在 `Views/WindowGesture.cs` |
 | `src/Core/` | Token、额度和汇总模型、增量汇总、金额计算 |
-| `src/Infrastructure/Codex/` | 发现会话文件、增量读取 JSONL、解析周额度 |
+| `src/Infrastructure/Codex/` | 发现会话文件、增量读取 JSONL、解析周额度、读取 Codex 插件与技能清单 |
 | `src/Desktop/Pokemon/` | 图鉴选择器、立绘和摸头效果 |
 | `src/Infrastructure/Pokemon/` | 加载图鉴数据，从固定来源下载并缓存立绘 |
 | `src/Infrastructure/Configuration/` | 用户设置和费率配置的读写 |
