@@ -20,8 +20,16 @@ if ($Test) {
 & $compiler /nologo $target @entryPoint /platform:x64 /optimize+ /codepage:65001 /langversion:5 `
     "/out:$output" "/win32manifest:$source\Desktop\TokenPet.manifest" `
     "/resource:$source\Desktop\Views\UsageDetails.xaml,TokenPet.UsageDetails.xaml" `
+    "/resource:$source\Desktop\Views\MascotMenu.xaml,TokenPet.MascotMenu.xaml" `
+    "/resource:$source\Desktop\Views\ComicTheme.xaml,TokenPet.ComicTheme.xaml" `
     "/resource:$source\Desktop\Pokemon\Picker.xaml,TokenPet.Picker.xaml" `
     "/resource:$PSScriptRoot\assets\kanto.json,TokenPet.Kanto.json" `
+    "/resource:$PSScriptRoot\assets\johto.json,TokenPet.Johto.json" `
+    "/resource:$PSScriptRoot\assets\hoenn.json,TokenPet.Hoenn.json" `
+    "/resource:$PSScriptRoot\assets\sinnoh.json,TokenPet.Sinnoh.json" `
+    "/resource:$PSScriptRoot\assets\unova.json,TokenPet.Unova.json" `
+    "/resource:$PSScriptRoot\assets\kalos.json,TokenPet.Kalos.json" `
+    "/resource:$PSScriptRoot\assets\alola.json,TokenPet.Alola.json" `
     "/r:$wpf\WindowsBase.dll" "/r:$wpf\PresentationCore.dll" "/r:$wpf\PresentationFramework.dll" `
     "/r:$wpf\UIAutomationTypes.dll" "/r:$framework\System.Web.Extensions.dll" "/r:$framework\System.Xaml.dll" `
     "/r:$framework\System.Net.Http.dll" `

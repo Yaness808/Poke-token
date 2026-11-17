@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Web.Script.Serialization;
 using TokenPet.Infrastructure.Pokemon;
 
@@ -16,11 +17,13 @@ namespace TokenPet.Infrastructure.Configuration
         public double Scale { get; set; }
         public string MascotPath { get; set; }
         public int PokemonId { get; set; }
+        public int[] FavoritePokemonIds { get; set; }
 
         public Preferences()
         {
             ResetPlacement();
-            PokemonId = KantoCatalog.DefaultId;
+            PokemonId = PokemonCatalog.DefaultId;
+            FavoritePokemonIds = new int[0];
         }
 
         internal void ResetPlacement()
@@ -45,6 +48,8 @@ namespace TokenPet.Infrastructure.Configuration
                 settings.Scale = ClampScale(settings.Scale);
                 settings.RightInset = ReadInset(settings.RightInset);
                 settings.BottomInset = ReadInset(settings.BottomInset);
+                settings.FavoritePokemonIds = (settings.FavoritePokemonIds ?? new int[0])
+                    .Where(id => id >= 1 && id <= PokemonCatalog.Count).Distinct().OrderBy(id => id).ToArray();
                 return settings;
             }
             catch (IOException) { return new Preferences(); }

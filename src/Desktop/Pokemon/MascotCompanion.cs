@@ -18,7 +18,7 @@ namespace TokenPet.Desktop.Pokemon
         private DateTime retryAfter;
         private CancellationTokenSource artworkRequest;
 
-        internal KantoCatalog Catalog { get; private set; }
+        internal PokemonCatalog Catalog { get; private set; }
         internal PokemonArtwork Artwork { get; private set; }
         internal PokemonSpecies Species { get; private set; }
         internal int SelectedId { get { return Catalog.Get(preferences.PokemonId).Id; } }
@@ -27,7 +27,7 @@ namespace TokenPet.Desktop.Pokemon
         {
             this.preferences = preferences;
             this.control = control;
-            Catalog = new KantoCatalog();
+            Catalog = new PokemonCatalog();
             Artwork = new PokemonArtwork(cacheDirectory);
 
             if (!string.IsNullOrEmpty(preferences.MascotPath))

@@ -1,10 +1,12 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
@@ -12,7 +14,6 @@ using TokenPet.Core;
 using TokenPet.Desktop.Pokemon;
 using TokenPet.Infrastructure.Codex;
 using TokenPet.Infrastructure.Configuration;
-using TokenPet.Infrastructure.Pokemon;
 using TokenPet.Infrastructure.Windows;
 
 namespace TokenPet.Desktop.Views
@@ -24,7 +25,7 @@ namespace TokenPet.Desktop.Views
         private readonly Preferences preferences;
         private readonly PetView surface = new PetView();
         private readonly ScaleTransform scale = new ScaleTransform(1, 1);
-        private readonly ContextMenu menu = new ContextMenu();
+        private readonly ContextMenu menu;
         private readonly MascotCompanion companion;
         private readonly DispatcherTimer follow = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
         private readonly DispatcherTimer refresh = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
@@ -62,15 +63,17 @@ namespace TokenPet.Desktop.Views
 
             mascot.MouseLeftButtonDown += (s, e) => BeginGesture(e);
 
+            using (var stream = typeof(OverlayWindow).Assembly.GetManifestResourceStream("TokenPet.MascotMenu.xaml"))
+                menu = (ContextMenu)XamlReader.Load(stream);
+            menu.Resources.MergedDictionaries.Add(ComicDialog.LoadTheme());
             AddMenu("用量详情…", ShowUsageDetails);
             AddMenu("调整大小…", ChangeSize);
             AddMenu("恢复默认位置和大小", ResetPlacement);
             menu.Items.Add(new Separator());
             AddMenu("切换宝可梦…", ChoosePokemon);
             AddMenu("使用本地图片…", ChooseMascot);
-            AddMenu("换回杰尼龟", ResetMascot);
             menu.Items.Add(new Separator());
-            AddMenu("隐藏 15 分钟", () => { hiddenUntil = DateTime.UtcNow.AddMinutes(15); Hide(); });
+            AddMenu("隐藏 15 分钟", () => { hiddenUntil = DateTime.UtcNow.AddMinutes(15); surface.HideDetails(); Hide(); });
             AddMenu("退出 Token 精灵", () => Application.Current.Shutdown());
             mascot.ContextMenu = menu;
 
@@ -183,8 +186,9 @@ namespace TokenPet.Desktop.Views
 
         private void Dock(DesktopWindows.Rect area, double dpi, Size size, bool show)
         {
-            DesktopWindows.Dock(interop.Handle, area, dpi, size.Width, size.Height,
-                preferences.RightInset, preferences.BottomInset, show);
+            if (DesktopWindows.Dock(interop.Handle, area, dpi, size.Width, size.Height,
+                preferences.RightInset, preferences.BottomInset, show))
+                surface.HideDetails();
         }
 
         private void BeginGesture(MouseButtonEventArgs e)
@@ -238,6 +242,7 @@ namespace TokenPet.Desktop.Views
 
         private void ChangeSize()
         {
+            surface.HideDetails();
             dialogOpen = true;
             try
             {
@@ -259,6 +264,7 @@ namespace TokenPet.Desktop.Views
 
         private void ChooseMascot()
         {
+            surface.HideDetails();
             dialogOpen = true;
             try
             {
@@ -279,21 +285,20 @@ namespace TokenPet.Desktop.Views
             MessageBox.Show(this, "无法读取图片，请选择有效的 PNG 或 JPEG 文件。", "更换头像");
         }
 
-        private void ResetMascot()
-        {
-            companion.Select(companion.Catalog.Get(KantoCatalog.DefaultId), null);
-            SavePreferences();
-        }
-
         private void ChoosePokemon()
         {
+            surface.HideDetails();
             dialogOpen = true;
             try
             {
-                var picker = new PickerWindow(this, companion.Catalog, companion.Artwork, companion.SelectedId);
-                if (picker.ShowDialog() != true) return;
-                companion.Select(picker.Selected, picker.SelectedArtwork);
-                SavePreferences();
+                var picker = new PickerWindow(this, companion.Catalog, companion.Artwork, companion.SelectedId,
+                    preferences.FavoritePokemonIds);
+                bool selected = picker.ShowDialog() == true;
+                var favorites = picker.FavoriteIds;
+                bool favoritesChanged = !favorites.SequenceEqual(preferences.FavoritePokemonIds);
+                preferences.FavoritePokemonIds = favorites;
+                if (selected) companion.Select(picker.Selected, picker.SelectedArtwork);
+                if (selected || favoritesChanged) SavePreferences();
             }
             finally { dialogOpen = false; Follow(); }
         }

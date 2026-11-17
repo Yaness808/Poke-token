@@ -6,6 +6,7 @@ using System.Threading;
 using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using TokenPet.Core;
@@ -35,7 +36,7 @@ namespace TokenPet.Tests
                 TestUsage(directory, log);
                 TestPlacement(settings);
                 TestPokemon(directory, settings);
-                Console.WriteLine("PASS: usage, placement, Kanto catalog, transparent mascot and usage bubble.");
+                Console.WriteLine("PASS: usage, placement, Pokédex, favorites, transparent mascot, usage popup and comic windows.");
                 return 0;
             }
             catch (Exception ex)
@@ -55,28 +56,103 @@ namespace TokenPet.Tests
 
         private static void TestPokemon(string directory, string settings)
         {
-            var catalog = new KantoCatalog();
+            var catalog = new PokemonCatalog();
             var all = catalog.Search("").ToArray();
-            Require(all.Length == 151 && all.Select(x => x.Id).SequenceEqual(Enumerable.Range(1, 151)),
-                "National Dex IDs 001 through 151.");
-            Require(catalog.Get(0).Name == "杰尼龟" && all.Last().Name == "梦幻", "Default and final species.");
+            Require(all.Length == 809 && all.Select(x => x.Id).SequenceEqual(Enumerable.Range(1, 809)),
+                "National Dex IDs 001 through 809.");
+            Require(catalog.Get(0).Name == "杰尼龟" && catalog.Get(151).Name == "梦幻" &&
+                catalog.Get(152).Name == "菊草叶" && catalog.Get(251).Name == "时拉比" &&
+                catalog.Get(252).Name == "木守宫" && catalog.Get(386).Name == "代欧奇希斯" &&
+                catalog.Get(387).Name == "草苗龟" && catalog.Get(493).Name == "阿尔宙斯" &&
+                catalog.Get(494).Name == "比克提尼" && catalog.Get(649).Name == "盖诺赛克特" &&
+                catalog.Get(650).Name == "哈力栗" && catalog.Get(721).Name == "波尔凯尼恩" &&
+                catalog.Get(722).Name == "木木枭" && all.Last().Name == "美录梅塔", "Catalog boundaries.");
+            Require(catalog.Search("", 1).Count() == 151 && catalog.Search("", 2).Count() == 100 &&
+                catalog.Search("", 3).Count() == 135 && catalog.Search("", 4).Count() == 107 &&
+                catalog.Search("", 5).Count() == 156 && catalog.Search("", 6).Count() == 72 &&
+                catalog.Search("", 7).Count() == 88 && !catalog.Search("#650", 5).Any() &&
+                !catalog.Search("#721", 7).Any() && catalog.Search("Melmetal", 7).Single().Id == 809,
+                "Generation filter.");
             Require(catalog.Search(" #025 ").Single().Id == 25 && catalog.Search("pikachu").Single().Id == 25 &&
                 catalog.Search("皮卡丘").Single().Id == 25 && !catalog.Search("xyzzy").Any(), "Numeric, English and Chinese search.");
             File.WriteAllText(settings, "{\"Scale\":1.15,\"MascotPath\":\"old.png\"}");
             var preferences = Preferences.Load(settings);
             Require(preferences.PokemonId == 7 && preferences.MascotPath == "old.png", "Legacy settings keep the existing custom picture.");
-            preferences.PokemonId = 151;
+            Require(preferences.FavoritePokemonIds.Length == 0, "Legacy settings start with no favorites.");
+            preferences.PokemonId = 493;
             preferences.MascotPath = null;
+            preferences.FavoritePokemonIds = new[] { 493, 25, 386, 251, 493, 0, 810 };
             preferences.Save(settings);
-            Require(Preferences.Load(settings).PokemonId == 151, "Selected Pokemon survives a restart.");
+            var saved = Preferences.Load(settings);
+            Require(saved.PokemonId == 493 && saved.FavoritePokemonIds.SequenceEqual(new[] { 25, 251, 386, 493 }),
+                "Selected Pokémon and valid favorites survive a restart.");
 
             Require(MascotControl.PortraitSize(catalog.Get(7)) < MascotControl.PortraitSize(catalog.Get(8)) &&
                 MascotControl.PortraitSize(catalog.Get(8)) < MascotControl.PortraitSize(catalog.Get(9)),
                 "Evolution increases the sprite size.");
             TestMascotLayout(catalog.Get(9));
-            var picker = new PickerWindow(null, catalog, new PokemonArtwork(directory), 151);
-            Require(picker.Selected.Id == 151, "Picker loads and preselects the configured species.");
+            var picker = new PickerWindow(null, catalog, new PokemonArtwork(directory), saved.PokemonId, saved.FavoritePokemonIds);
+            Require(picker.Selected.Id == 493 && picker.AllowsTransparency, "Picker loads the comic frame and selected Pokémon.");
+            var view = (FrameworkElement)((ContentControl)picker.Content).Content;
+            var generation = (ComboBox)view.FindName("Generation");
+            var favoritesOnly = (CheckBox)view.FindName("FavoritesOnly");
+            var search = (TextBox)view.FindName("Search");
+            var entries = (ListBox)view.FindName("Entries");
+            var favoriteButton = (Button)view.FindName("Favorite");
+            var star = (System.Windows.Shapes.Path)view.FindName("FavoriteStar");
+            var gold = (Brush)star.FindResource("ComicFavoriteGold");
+            Require(star.Fill == gold, "The star is gold when a saved favorite is reopened.");
+            generation.SelectedIndex = 4;
+            favoritesOnly.IsChecked = true;
+            Require(entries.Items.Count == 1 && picker.Selected.Id == 493, "Favorites can be filtered by generation.");
+            favoriteButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Require(entries.Items.Count == 0 && picker.Selected == null && !favoriteButton.IsEnabled,
+                "Unfavoriting updates the filtered list.");
+            generation.SelectedIndex = 3;
+            Require(entries.Items.Count == 1 && picker.Selected.Id == 386 && star.Fill == gold,
+                "The third-generation filter keeps its own favorite.");
+            favoritesOnly.IsChecked = false;
+            search.Text = "252";
+            Require(picker.Selected.Id == 252 && star.Fill == Brushes.Transparent, "An unsaved Pokémon has a hollow star.");
+            favoriteButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Require(star.Fill == gold && picker.FavoriteIds.SequenceEqual(new[] { 25, 251, 252, 386 }),
+                "Clicking favorite lights the star immediately.");
+            favoriteButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Require(star.Fill == Brushes.Transparent, "Clicking the lit star turns it off.");
+
+            generation.SelectedIndex = 5;
+            search.Text = "Victini";
+            Require(picker.Selected.Id == 494, "Fifth-generation English search.");
+            generation.SelectedIndex = 6;
+            search.Text = "甲贺忍蛙";
+            Require(picker.Selected.Id == 658, "Sixth-generation Chinese search.");
+            generation.SelectedIndex = 7;
+            search.Text = "#809";
+            Require(picker.Selected.Id == 809, "Seventh-generation Pokédex number search.");
+            favoriteButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Require(star.Fill == gold && picker.FavoriteIds.Contains(809), "New species can be favorited.");
+            saved.PokemonId = picker.Selected.Id;
+            saved.FavoritePokemonIds = picker.FavoriteIds;
             picker.Close();
+            saved.Save(settings);
+            var reopened = Preferences.Load(settings);
+            Require(reopened.PokemonId == 809 && reopened.FavoritePokemonIds.Contains(809),
+                "Seventh-generation selection and favorite survive a restart.");
+
+            var size = new SizeDialog(null, 1.12);
+            Require(size.AllowsTransparency && Math.Abs(size.SelectedScale - 1.12) < 0.001 &&
+                ((ContentControl)size.Content).Style == ((ContentControl)size.Content).FindResource("ComicFrame"),
+                "The size dialog uses the shared comic frame and loads the configured scale.");
+            size.Close();
+
+            var overlay = new OverlayWindow(null, settings);
+            var mascot = ((PetView)overlay.Content).Mascot;
+            Require(mascot.Cursor != null && mascot.Cursor != Cursors.SizeAll, "Mascot uses the glove cursor.");
+            var menu = mascot.ContextMenu;
+            Require(menu.Template != null && menu.Items.OfType<MenuItem>().Count() == 7 &&
+                menu.Items.OfType<MenuItem>().All(item => !item.Header.ToString().Contains("换回杰尼龟")),
+                "The comic menu has the expected actions.");
+            overlay.Close();
         }
 
         private static void TestMascotLayout(PokemonSpecies species)
@@ -106,11 +182,9 @@ namespace TokenPet.Tests
             var openSize = pet.DesiredSize;
             pet.Arrange(new Rect(openSize));
             pet.UpdateLayout();
-            var petCorner = pet.Mascot.TranslatePoint(new Point(pet.Mascot.Width, pet.Mascot.Height), pet);
-            Require(pet.DetailsVisible && openSize.Height > size.Height &&
-                Math.Abs(petCorner.X - openSize.Width) < .1 && Math.Abs(petCorner.Y - openSize.Height) < .1,
-                "The bubble expands above the pet while preserving its bottom-right anchor.");
-            pet.ToggleDetails(new Summary());
+            Require(openSize == size && pet.Mascot.TranslatePoint(new Point(0, 0), pet) == new Point(0, 0),
+                "The popup does not change the pet window footprint or anchor.");
+            pet.HideDetails();
             pet.Measure(unconstrained);
             Require(!pet.DetailsVisible && pet.DesiredSize == size, "Closing the bubble restores the compact footprint.");
         }

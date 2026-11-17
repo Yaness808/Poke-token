@@ -1,7 +1,6 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using TokenPet.Core;
@@ -27,7 +26,7 @@ namespace TokenPet.Desktop.Pokemon
         internal MascotControl()
         {
             RenderOptions.SetBitmapScalingMode(portrait, BitmapScalingMode.HighQuality);
-            Cursor = Cursors.SizeAll;
+            Cursor = GloveCursor.Value;
             Children.Add(shadow);
             Children.Add(portrait);
             Children.Add(fallback);

@@ -44,7 +44,7 @@ namespace TokenPet.Infrastructure.Pokemon
 
         private string CachePath(int id)
         {
-            if (id < 1 || id > KantoCatalog.Count) throw new ArgumentOutOfRangeException("id");
+            if (id < 1 || id > PokemonCatalog.Count) throw new ArgumentOutOfRangeException("id");
             return Path.Combine(directory, id.ToString("000", CultureInfo.InvariantCulture) + ".png");
         }
 

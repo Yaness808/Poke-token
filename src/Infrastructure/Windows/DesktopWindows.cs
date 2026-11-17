@@ -121,14 +121,15 @@ namespace TokenPet.Infrastructure.Windows
             return GetAsyncKeyState(System.Windows.SystemParameters.SwapButtons ? 2 : 1) < 0;
         }
 
-        internal static void Dock(IntPtr overlay, Rect area, double dpi, double width, double height,
+        internal static bool Dock(IntPtr overlay, Rect area, double dpi, double width, double height,
             double rightInset, double bottomInset, bool show)
         {
             int x = (int)Math.Max(area.Left, area.Right - Math.Round((width + rightInset) * dpi));
             int y = (int)Math.Max(area.Top, area.Bottom - Math.Round((height + bottomInset) * dpi));
             Rect bounds;
             if (show || !GetWindowRect(overlay, out bounds) || bounds.Left != x || bounds.Top != y)
-                SetWindowPos(overlay, new IntPtr(-1), x, y, 0, 0, show ? 0x0051u : 0x0011u);
+                return SetWindowPos(overlay, new IntPtr(-1), x, y, 0, 0, show ? 0x0051u : 0x0011u);
+            return false;
         }
     }
 }
